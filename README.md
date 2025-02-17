@@ -72,7 +72,9 @@ and passwords. Do not check them into source control.
 
 3. Add a unique SEARXNG_SEARCH value to your `env/searxng.env` file
 
-4. Add a unique WEBUI_SECRET_KEY to both your `env/auth.env` and `env/openwebui.env`
+4. Add a unique WEBUI_SECRET_KEY to both your `env/auth.env` and 
+`env/openwebui.env`. This allows jwt token authentication to work with the 
+main Open Webui (/), swagger (/docs), redis (/redis), and searxng (/searxng).
 
 5. Execute docker containers to start your environment
 
