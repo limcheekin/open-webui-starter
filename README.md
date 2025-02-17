@@ -70,10 +70,10 @@ cp env/searxng.example env/searxng.env
 ***The environment files can contain sensitive information such as API keys 
 and passwords. Do not check them into source control.
 
-3. Add a unique SEARXNG_SEARCH value to your `env/searxng.env` file
+3. Add a unique SEARXNG_SEARCH value to your [env/searxng.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/searxng.example) file
 
-4. Add a unique WEBUI_SECRET_KEY to both your `env/auth.env` and 
-`env/openwebui.env`. This allows jwt token authentication to work with the 
+4. Add a unique WEBUI_SECRET_KEY to both your [env/auth.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/auth.example) and 
+[env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example). This allows jwt token authentication to work with the 
 main Open Webui (/), swagger (/docs), redis (/redis), and searxng (/searxng).
 
 5. Execute docker containers to start your environment
@@ -93,14 +93,14 @@ We will be using certbot to generate a free SSL certificate. More can be found o
 ***Automated renewal information can be found at [this link](https://eff-certbot.readthedocs.io/en/latest/using.html#setting-up-automated-renewal).***
 
 1. Configure your custom domain tld to point to the IP of the nginx docker container (or a forwarding IP) - create both A and AAAA records
-2. Modify your /conf/nginx/challenge.conf with the custom domain (1 place in the file)
-3. Modify the nginx section in your compose.yaml to replace the default.conf with challenge.conf file
+2. Modify your [/conf/nginx/challenge.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/challenge.conf.example) with the custom domain (1 place in the file)
+3. Modify the nginx section in your compose.yaml to replace the [/conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.conf.example) with challenge.conf file
 4. Create a new ssl certificate using the command below (update the email and domain that should be associated with the certificate)
 ```sh
 docker compose -f compose.yaml run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email <email> --agree-tos --no-eff-email --force-renewal -d <domain>
 ```
-5. Update your /conf/nginx/default.conf file with the custom domain (4 places in the file)
-6. Modify the nginx section in your compose.yaml to replace the challenge.conf with default.conf file
+5. Update your [/conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.conf.example) file with the custom domain (4 places in the file)
+6. Modify the nginx section in your [compose.yaml](https://github.com/iamobservable/open-webui-starter/blob/main/compose.yaml) to replace the [challenge.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/challenge.conf.example) with [default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.conf.example) file
 
 ***More information on [configuring SSL with certbot](https://medium.com/@dinusai05/setting-up-a-secure-reverse-proxy-with-https-using-docker-compose-nginx-and-certbot-lets-encrypt-cfd012c53ca0)
 
