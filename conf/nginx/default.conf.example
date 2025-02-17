@@ -4,40 +4,57 @@ events {
   worker_connections   1000;
 }
 
-upstream authUpstream {
-  server auth:9090 max_fails=0 fail_timeout=10s;
-  keepalive 512;
-}
-
-upstream redisWebUpstream {
-  server auth:8001 max_fails=0 fail_timeout=10s;
-  keepalive 512;
-}
-
 http {
+  log_format compression '$remote_addr - $remote_user [$time_local] '
+                           '"$request" $status $body_bytes_sent '
+                           '"$http_referer" "$http_user_agent" "$gzip_ratio"';
+
+  upstream authUpstream {
+    server auth:9090 max_fails=0 fail_timeout=10s;
+    keepalive 512;
+  }
+
+  upstream openwebuiUpstream {
+    server openwebui:8080 max_fails=0 fail_timeout=10s;
+    keepalive 512;
+  }
+
+  upstream redisUpstream {
+    server redis:8001 max_fails=0 fail_timeout=10s;
+    keepalive 512;
+  }
+
+  upstream searxngUpstream {
+    server searxng:8080 max_fails=0 fail_timeout=10s;
+    keepalive 512;
+  }
+
   server {
     listen 80;
-    server_name <custom-domain>;
+    server_name <custom domain>;
     return 301 https://$host$request_uri;
   }
 
   server {
     listen 443 ssl;
-    server_name <custom-domain>;
+    server_name <custom domain>;
 
-    ssl_certificate /etc/letsencrypt/live/<custom-domain>/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/<custom-domain>/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/<custom domain>/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/<custom domain>/privkey.pem;
 
     # Optional: Add SSL security settings
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384';
     ssl_prefer_server_ciphers on;
 
-    location /searxng {
+    location /docs {
       auth_request /auth-server/validate;
       auth_request_set $auth_status $upstream_status;
 
-      proxy_pass http://searxng:8080;
+      error_page 401 = @fallback;
+      add_header X-Auth-Status $auth_status;
+
+      proxy_pass http://openwebuiUpstream;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -48,15 +65,38 @@ http {
       auth_request /auth-server/validate;
       auth_request_set $auth_status $upstream_status;
 
-      proxy_pass http://redisWebupstream;
+      error_page 401 = @fallback;
+      add_header X-Auth-Status $auth_status;
+
+      proxy_pass http://redisUpstream;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    location /searxng {
+      auth_request /auth-server/validate;
+      auth_request_set $auth_status $upstream_status;
+
+      error_page 401 = @fallback;
+      add_header X-Auth-Status $auth_status;
+
+      proxy_pass http://searxngUpstream;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /auth-server/ {
+      internal;
+      proxy_pass http://authupstream/;
+      proxy_buffers 7 16k;
+      proxy_buffer_size 31k;
+    }
+
     location / {
-      proxy_pass http://openwebui:8080;
       proxy_set_header Host $host;
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -68,16 +108,12 @@ http {
       proxy_cache_bypass $http_upgrade;
 
       client_max_body_size 20M;
+
+      proxy_pass http://openwebui:8080;
     }
 
-    location /auth-server/ {
-      internal;
-      proxy_pass http://authUpstream/;
-      proxy_buffers 8 16k;
-      proxy_buffer_size 32k;
-      proxy_set_header Host $http_host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    location @fallback {
+      return 302 /auth?redirect=$uri;
     }
   }
 }
