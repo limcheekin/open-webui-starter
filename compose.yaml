@@ -7,7 +7,23 @@ services:
       - env/auth.env
     restart: unless-stopped
 
-  ollama:
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  db:
+    env_file:
+      - env/db.env
+    image: pgvector/pgvector:pg15
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+  edgetts:
     deploy: &gpu-deploy
       resources:
         reservations:
@@ -16,6 +32,30 @@ services:
               count: 1
               capabilities: [gpu]
     env_file:
+      - env/edgetts.env
+    image: travisvn/openai-edge-tts:latest
+    ports:
+      - 5050:5050
+    restart: unless-stopped
+
+  nginx:
+    depends_on:
+      - auth
+      - certbot
+      - openwebui
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    volumes:
+      - ./conf/nginx/default.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  ollama:
+    deploy: *gpu-deploy
+    env_file:
       - env/ollama.env
     image: ollama/ollama:latest
     ports:
@@ -23,20 +63,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/ollama:/root/.ollama
-
-  db:
-    env_file:
-      - env/db.env
-    image: pgvector/pgvector:pg15
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-
-  redis:
-    env_file:
-      - env/redis.env
-    image: redis/redis-stack:latest
-    volumes:
-      - ./data/redis:/data
 
   openwebui:
     depends_on:
@@ -60,13 +86,13 @@ services:
     volumes:
       - ./data/pipelines:/app/pipelines
 
-  edgetts:
-    deploy: *gpu-deploy
+  redis:
     env_file:
-      - env/edgetts.env
-    image: travisvn/openai-edge-tts:latest
-    ports:
-      - 5050:5050
+      - env/redis.env
+    image: redis/redis-stack:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/redis:/data
 
   searxng:
     cap_add:
@@ -91,32 +117,12 @@ services:
       - ./data/searxng/settings.yml:/etc/searxng/settings.yml:rw
       - ./data/searxng/uwsgi.ini:/etc/searxng/uwsgi.ini:rw
 
-  nginx:
-    depends_on:
-      - auth
-      - certbot
-      - openwebui
-    image: nginx:latest
-    ports:
-      - 80:80
-      - 443:443
-    restart: unless-stopped
-    volumes:
-      - ./conf/nginx/default.conf:/etc/nginx/nginx.conf
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-
   watchtower:
     command: --cleanup --debug --interval 300
     depends_on:
       - openwebui
     image: containrrr/watchtower
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
