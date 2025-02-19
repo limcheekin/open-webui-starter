@@ -1,8 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const { Client } = require("pg");
 
-console.log(process.argv);
-
 const SQLITE_PATH = process.argv[2];
 const PG_URL = process.argv[3];
 
@@ -33,14 +31,14 @@ async function migrate() {
         console.log("  - skipping: migration table");
         continue;
       }
-      
+
       // Check if table exists first
       const tableExists = await pgClient.query(
         `SELECT EXISTS (
           SELECT FROM information_schema.tables 
           WHERE table_name = $1
         )`,
-        [safeTableName]
+        [safeTableName],
       );
 
       if (tableExists.rows[0].exists) {
