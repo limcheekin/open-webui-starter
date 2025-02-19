@@ -20,7 +20,7 @@ starter project includes the following tooling and applications:
 - **[Postgresql](https://www.postgresql.org/)/[PgVector](https://github.com/pgvector/pgvector)**: A free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance (has vector addon)
 - **[Searxng](https://docs.searxng.org/)**: A free internet metasearch engine for open webui tool integration
 - **[Nginx](https://nginx.org/)**: A web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache
-- **[Cloudflared](https://www.cloudflare.com/)**: A cloudflare tunnel tool providing anonymous proxying and SSL certificates
+- **[Cloudflare](https://www.cloudflare.com/)**: Cloudflare hosting and tunnel tool providing anonymous proxying and SSL certificates
 - **[Watchtower](https://github.com/containrrr/watchtower)**: A process for automating Docker container base image updates.
 
 
@@ -76,7 +76,7 @@ and passwords. Do not check them into source control.*
 5. Create a Cloudflare account and configure a Zero Trust Network tunnel.
 6. Add or create your domain, so Cloudflare can manage it.
 7. Create a new tunnel, this will allow traffic to flow to your local machine.
-8. Set the tunnel id in your [conf/cloudflared/config.yml](http://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflared/config.example#L1)
+8. Set the tunnel id in your [conf/cloudflared/config.yml](https://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflare/config.example#L1)
 9. Add tunnel token within your [env/cloudflared.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/cloudflared.example#L1)
 10. Update your [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L34) with your domain
 11. Execute docker containers to start your environment
@@ -87,6 +87,45 @@ docker compose up -d
 
 Once the containers are started, access the Open Webui platform by visiting 
 `http://<domain-name>/` in your web browser.
+
+
+
+## Migrating from Sqlite to Postgresql
+
+*** Tested using node v22.12.0 ***
+
+Depending on your setup, you may need to expose your postgresql (db) container 
+port before proceeding. By default, this project's db container is not exposing 
+a port. 
+
+***example***
+
+```yaml
+services:
+  db:
+image: pgvector/pgvector:pg15
+    ports:
+      - 5432:5432
+```
+
+1. Change to the migrator folder and install node packages
+
+```bash
+cd migrator
+npm install
+```
+
+2. Execute migrate.js file with node. Adjust the following command with your 
+specific configuration locations, user, password, and database names.
+
+```bash
+node migrate.js ../data/openwebui/webui.db "postgresql://postgres:postgres@localhost/openwebui"
+```
+
+3. Remove and restart your postgresql container
+```bash
+docker compose down db && docker compose up db -d
+```
 
 
 ## Contribution
