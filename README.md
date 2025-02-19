@@ -20,7 +20,7 @@ starter project includes the following tooling and applications:
 - **[Postgresql](https://www.postgresql.org/)/[PgVector](https://github.com/pgvector/pgvector)**: A free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance (has vector addon)
 - **[Searxng](https://docs.searxng.org/)**: A free internet metasearch engine for open webui tool integration
 - **[Nginx](https://nginx.org/)**: A web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache
-- **[Certbot](https://certbot.eff.org/)**: A tool that helps with setup and configuring of SSL certificates
+- **[Cloudflared](https://www.cloudflare.com/)**: A cloudflare tunnel tool providing anonymous proxying and SSL certificates
 - **[Watchtower](https://github.com/containrrr/watchtower)**: A process for automating Docker container base image updates.
 
 
@@ -42,23 +42,23 @@ The following dependencies are required to run the Open Webui Starter project:
 
 To install the Open Webui Starter project, follow these steps:
 
-1. Clone this repository using your preferred Git client.
+1. Clone this repository using your preferred Git client
 
 ```sh
 git clone https://github.com/iamobservable/open-webui-starter.git
 ```
 
-2. Create new environment files. Update them with your environment changes.
+2. Create new environment files and update with your environment changes
 
 ```sh
-cp conf/nginx/challenge.conf.example conf/nginx/challenge.conf
-cp conf/nginx/default.conf.example conf/nginx/default.conf
+cp conf/cloudflared/config.example conf/cloudflared/config.yml
+cp conf/nginx/default.example conf/nginx/default.conf
 
 cp data/searxng/settings.yml.example data/searxng/settings.yml
 cp data/searxng/uwsgi.ini.example data/searxng/uwsgi.ini
-cp conf/nginx/default.conf.example conf/nginx/default.conf
 
 cp env/auth.example env/auth.env
+cp env/cloudflared.example env/cloudflared.env
 cp env/db.example env/db.env
 cp env/edgetts.example env/edgetts.env
 cp env/ollama.example env/ollama.env
@@ -70,39 +70,24 @@ cp env/searxng.example env/searxng.env
 *The environment files can contain sensitive information such as API keys 
 and passwords. Do not check them into source control.*
 
-3. Add a unique SEARXNG_SEARCH value to your [env/searxng.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/searxng.example) file.
-
-4. Add a unique WEBUI_SECRET_KEY to both your [env/auth.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/auth.example) and 
-[env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example). This allows jwt token authentication to work with the 
-main Open Webui (/), swagger (/docs), redis (/redis), and searxng (/searxng).
-
-5. Execute docker containers to start your environment.
+3. Add a unique SEARXNG_SECRET value to your [env/searxng.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/searxng.example#L3)
+4. Add a unique WEBUI_SECRET_KEY to both your [env/auth.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/auth.example#L2) and 
+[env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L10); MAKE SURE THEY MATCH. This allows jwt token authentication to work with the main Open Webui (/), swagger (/docs), redis (/redis), and searxng (/searxng)
+5. Create a Cloudflare account and configure a Zero Trust Network tunnel.
+6. Add or create your domain, so Cloudflare can manage it.
+7. Create a new tunnel, this will allow traffic to flow to your local machine.
+8. Set the tunnel id in your [conf/cloudflared/config.yml](http://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflared/config.example#L1)
+9. Add tunnel token within your [env/cloudflared.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/cloudflared.example#L1)
+10. Update your [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L34) with your domain
+11. Execute docker containers to start your environment
 
 ```sh
 docker compose up -d
 ```
 
-6. Once the containers are started, access the Open Webui platform by visiting 
-`http://localhost/` in your web browser.
+Once the containers are started, access the Open Webui platform by visiting 
+`http://<domain-name>/` in your web browser.
 
-
-### Optional SSL Installation
-
-We will be using certbot to generate a free SSL certificate. More can be found on using certbot within the [Certbot User Guide](https://eff-certbot.readthedocs.io/en/latest/using.html).
-
-***Automated renewal information can be found at [this link](https://eff-certbot.readthedocs.io/en/latest/using.html#setting-up-automated-renewal).***
-
-1. Configure your custom domain tld to point to the IP of the nginx docker container (or a forwarding IP) - create both A and AAAA records.
-2. Modify your [/conf/nginx/challenge.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/challenge.conf.example) with the custom domain (1 place in the file).
-3. Modify the nginx section in your compose.yaml to replace the [/conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.conf.example) with challenge.conf file.
-4. Create a new ssl certificate using the command below (update the email and domain that should be associated with the certificate).
-```sh
-docker compose -f compose.yaml run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email <email> --agree-tos --no-eff-email --force-renewal -d <domain>
-```
-5. Update your [/conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.conf.example) file with the custom domain (4 places in the file).
-6. Modify the nginx section in your [compose.yaml](https://github.com/iamobservable/open-webui-starter/blob/main/compose.yaml) to replace the [challenge.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/challenge.conf.example) with [default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.conf.example) file.
-
-***More information on [configuring SSL with certbot](https://medium.com/@dinusai05/setting-up-a-secure-reverse-proxy-with-https-using-docker-compose-nginx-and-certbot-lets-encrypt-cfd012c53ca0)
 
 ## Contribution
 
