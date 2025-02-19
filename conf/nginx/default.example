@@ -31,21 +31,7 @@ http {
 
   server {
     listen 80;
-    server_name <custom domain>;
-    return 301 https://$host$request_uri;
-  }
-
-  server {
-    listen 443 ssl;
-    server_name <custom domain>;
-
-    ssl_certificate /etc/letsencrypt/live/<custom domain>/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/<custom domain>/privkey.pem;
-
-    # Optional: Add SSL security settings
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384';
-    ssl_prefer_server_ciphers on;
+    server_name <domain-name>;
 
     location /docs {
       auth_request /auth-server/validate;
@@ -91,7 +77,7 @@ http {
 
     location /auth-server/ {
       internal;
-      proxy_pass http://authupstream/;
+      proxy_pass http://authUpstream/;
       proxy_buffers 7 16k;
       proxy_buffer_size 31k;
     }
