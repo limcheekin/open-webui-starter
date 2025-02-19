@@ -33,15 +33,26 @@ async function migrate() {
         console.log("  - skipping: migration table");
         continue;
       }
-
-      const result = await pgClient.query(
-        `SELECT COUNT(*) FROM ${safeTableName}`,
+      
+      // Check if table exists first
+      const tableExists = await pgClient.query(
+        `SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = $1
+        )`,
+        [safeTableName]
       );
-      const rowCount = parseInt(result.rows[0].count, 10);
 
-      if (rowCount > 0) {
-        console.log(`  - skipping table: has ${rowCount} existing rows`);
-        continue;
+      if (tableExists.rows[0].exists) {
+        const result = await pgClient.query(
+          `SELECT COUNT(*) FROM ${safeTableName}`,
+        );
+        const rowCount = parseInt(result.rows[0].count, 10);
+
+        if (rowCount > 0) {
+          console.log(`  - skipping table: has ${rowCount} existing rows`);
+          continue;
+        }
       }
 
       console.log("  - migrating");
