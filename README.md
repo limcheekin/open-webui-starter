@@ -1,54 +1,55 @@
-# Open Webui Starter
+# Open WebUI Starter
 =====================
 
-The Open Webui Starter project is meant to provide a quick template fork 
-setting up [Open Webui](https://openwebui.com/). More information can be found 
-about configurations on the [Open Webui Docs](https://docs.openwebui.com/).
+The Open WebUI Starter project is meant to provide a quick template for 
+setting up [Open WebUI](https://openwebui.com/). More information can be found 
+about configurations on the [Open WebUI Docs](https://docs.openwebui.com/) or the [Gitub repository](https://github.com/open-webui/open-webui).
 
 
 ## Project Overview
 
-The Open Webui Starter project is a entry into using the open-source project 
-Open Webui. It integrates with various Large Language Models (LLMs) and provides 
-a private, user-friendly, and local interface for interacting with "AI". This 
-starter project includes the following tooling and applications:
-
-- **[Ollama](https://ollama.com/)**: Get up and running with large language models.
-- **[Open Webui](https://openwebui.com/)**: Open WebUI is an extensible, feature-rich, and user-friendly self-hosted AI platform designed to operate entirely offline
-- **[Edge TTS](https://github.com/rany2/edge-tts)**: Python module that allows you to use Microsoft Edge's online text-to-speech service
-- **[Redis](https://redis.io/)**: An open source-available, in-memory storage, used as a distributed, in-memory key–value database, cache and message broker, with optional durability
-- **[Postgresql](https://www.postgresql.org/)/[PgVector](https://github.com/pgvector/pgvector)**: A free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance (has vector addon)
-- **[Searxng](https://docs.searxng.org/)**: A free internet metasearch engine for open webui tool integration
-- **[Nginx](https://nginx.org/)**: A web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache
-- **[Cloudflare](https://www.cloudflare.com/)**: Cloudflare hosting and tunnel tool providing anonymous proxying and SSL certificates
-- **[Watchtower](https://github.com/containrrr/watchtower)**: A process for automating Docker container base image updates.
-
+The Open WebUI Starter project is a entry into using the open-source project 
+Open WebUI. Open WebUI integrates with various Large Language Models (LLMs) and provides a private, user-friendly, and local interface for interacting with computer intelligence.
 
 ## Table of Contents
 1. [Dependencies](#dependencies)
+1. [Tooling and Applications](#tooling-and-applications)
 2. [Installation](#installation)
 3. [Contribution](#contribution)
 
-
 ## Dependencies
 
-The following dependencies are required to run the Open Webui Starter project:
+- **[Git](https://git-scm.com/)**: Version control system for managing code changes
+- **[Docker](https://docs.docker.com/)**: Containerization platform for running and deploying applications
 
-- **Git**: Version control system for managing code changes
-- **Docker**: Containerization platform for running and deploying applications
+
+## Tooling and Applications
+
+This starter project includes the following tooling and applications.
+
+- **[Ollama](https://ollama.com/)**: Local service API serving open source large language models
+- **[Open WebUI](https://openwebui.com/)**: Open WebUI is an extensible, feature-rich, and user-friendly self-hosted AI platform designed to operate entirely offline
+- **[Edge TTS](https://github.com/rany2/edge-tts)**: Python module that using Microsoft Edge's online text-to-speech service
+- **[Redis](https://redis.io/)**: An open source-available, in-memory storage, used as a distributed, in-memory key–value database, cache and message broker, with optional durability
+- **[Postgresql](https://www.postgresql.org/)/[PgVector](https://github.com/pgvector/pgvector)**: A free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance (has vector addon)
+- **[Sqlite](https://www.sqlite.org/index.html)**: A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine
+- **[Searxng](https://docs.searxng.org/)**: Free internet metasearch engine for open webui tool integration
+- **[Nginx](https://nginx.org/)**: Web server, reverse proxy, load balancer, mail proxy, and HTTP cache
+- **[Cloudflare](https://www.cloudflare.com/)**: Platform providing anonymous proxying and SSL certificates
+- **[Watchtower](https://github.com/containrrr/watchtower)**: Automated Docker container for updating container images automatically
 
 
 ## Installation
 
-To install the Open Webui Starter project, follow these steps:
+To install the Open WebUI Starter project, follow these steps:
 
-1. Clone this repository using your preferred Git client
+### Clone this repository
 
 ```sh
 git clone https://github.com/iamobservable/open-webui-starter.git
 ```
 
-2. Create new environment files and update with your environment changes
+### Create the environment files
 
 ```sh
 cp conf/cloudflared/config.example conf/cloudflared/config.yml
@@ -70,27 +71,85 @@ cp env/searxng.example env/searxng.env
 *The environment files can contain sensitive information such as API keys 
 and passwords. Do not check them into source control.*
 
-3. Add a unique SEARXNG_SECRET value to your [env/searxng.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/searxng.example#L3)
-4. Add a unique WEBUI_SECRET_KEY to both your [env/auth.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/auth.example#L2) and 
-[env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L10); MAKE SURE THEY MATCH. This allows jwt token authentication to work with the main Open Webui (/), swagger (/docs), redis (/redis), and searxng (/searxng)
-5. Create a Cloudflare account and configure a Zero Trust Network tunnel.
-6. Add or create your domain, so Cloudflare can manage it.
-7. Create a new tunnel, this will allow traffic to flow to your local machine.
-8. Set the tunnel id in your [conf/cloudflared/config.yml](https://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflare/config.example#L1)
-9. Add tunnel token within your [env/cloudflared.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/cloudflared.example#L1)
-10. Update your [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L34) with your domain
-11. Execute docker containers to start your environment
+### Add a unique SEARXNG_SECRET
+
+Make this change to your searxng environment file [env/searxng.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/searxng.example#L3). The link provided will lead you to the github repository to read about it.
+
+### Add a unique WEBUI_SECRET_KEY to your environment files
+
+Make this change to your auth environment file [env/auth.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/auth.example#L2). The link provided will lead you to the github repository to read about it.
+
+Make this change to your openwebui environment file [env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L10).
+
+**Make sure the environment files match**:. This allows jwt token authentication to work with the main Open WebUI (/), swagger (/docs), redis (/redis), and searxng (/searxng)
+
+### Setup Cloudflare
+
+Cloudflare provides a way to point web browsers to a domain name that connects to your local Open WebUI environment. The platform will also setup and provide a free certificate so you can secure your domain name with SSL.
+
+<img src="./images/alert-original.png" alt="Beware Image" width="15" height="15"> **Beware**
+
+One additional point about moving forward without using a proxying platform like Cloudflare. With the right tools, IP addresses can be mapped to a physical location in the real world. If you connect a domain name to your home IP without the use of a proxying platform, it is possible to [DOX](https://en.wikipedia.org/wiki/Doxing) the location. *It is in your best interest to use a proxy, thus anonymizing the location.*
+
+#### Sign up with a [free account](https://www.cloudflare.com/plans/)
+
+Get started using Cloudflare.
+
+<img src="./images/cloudflare-signup.png" alt="Cloudflare Signup" align="center" width="1000">
+
+#### Add a domain for Cloudflare to manage
+
+This allows Cloudflare to receive visitors when they look up your domain in a browser.
+
+<img src="./images/cloudflare-account.png" alt="Cloudflare Account" align="center" width="1000">
+
+#### Configure a Zero Trust Network tunnel
+
+This allows Cloudflare to send visitors to your connected environment (home or otherwise)
+
+<img src="./images/cloudflare-tunnel.png" alt="Cloudflare Tunnel" align="center" width="1000">
+
+
+### Assign your tunnel id
+
+Update the [conf/cloudflared/config.yml](https://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflare/config.example#L1) file with your tunnel id. It can be found located in one of the two red rectangles on the image above.
+
+### Assign your tunnel token
+
+Update the [env/cloudflared.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/cloudflared.example#L1) file with your token. It can be found in the red rectangle on the image below.
+
+<img src="./images/cloudflare-connector.png" alt="Cloudflare Connector" align="center" width="1000">
+
+### Add your domain name
+
+Update the [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L34) file with your domain name. The link provided will show you the specific line in the file to change.
+
+### Decide on a database
+
+__TL/DR__
+
+The easiest route is to skip this section and use Sqlite. If you want to use Postgresql as a database, follow along below.
+
+__More Detailed__
+
+Uncomment your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L2) file to setup a connection to the locally running db service. To do this, remove the "#" from the beginning of the line.
+
+### Start your docker container environment
 
 ```sh
 docker compose up -d
 ```
 
-Once the containers are started, access the Open Webui platform by visiting 
+Once the containers are started, access the Open WebUI platform by visiting 
 `http://<domain-name>/` in your web browser.
 
 
 
-## Migrating from Sqlite to Postgresql
+## Additional Setup
+
+### Migrating from Sqlite to Postgresql
+
+If your environment is already setup and you do not want to lose data, follow along below. If this is your initial setup, you can skip this and follow the above instructions on how to [Decide on a database](#decide-on-a-database)
 
 *** Tested using node v22.12.0 ***
 
@@ -127,7 +186,7 @@ node migrate.js ../data/openwebui/webui.db "postgresql://postgres:postgres@local
 docker compose down db && docker compose up db -d
 ```
 
-## Watchtower and Notifications
+### Watchtower and Notifications
 
 A Watchtower container provides a convenient way to check in on your container 
 versions to see if updates have been released. Once updates are found, Watchtower 
@@ -151,7 +210,7 @@ docker compose down watchtower && docker compose up watchtower -d
 
 ## Contribution
 
-Contributions to the Open Webui Starter project are welcome. If you'd like to 
+Contributions to the Open WebUI Starter project are welcome. If you'd like to 
 contribute, please fork this repository and submit a pull request with any 
 changes or additions.
 
