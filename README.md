@@ -127,6 +127,27 @@ node migrate.js ../data/openwebui/webui.db "postgresql://postgres:postgres@local
 docker compose down db && docker compose up db -d
 ```
 
+## Watchtower and Notifications
+
+A Watchtower container provides a convenient way to check in on your container 
+versions to see if updates have been released. Once updates are found, Watchtower 
+will pull the latest container image(s), stop the currently running container and 
+start a new container based on the new image. After completing its process, 
+Watchtower can send notifications to you. More can be found on notifications via 
+the [Watchtower website](https://containrrr.dev/watchtower/notifications/).
+
+For the sake of simplicity, this document will cover the instructions for setting 
+up notifications via Discord. If you desire to be more detailed in your configuration, 
+the [arguments section](https://containrrr.dev/watchtower/arguments/) describes 
+additional settings available for the watchtower setup.
+
+1. Edit your [env/watchtower.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/watchtower.example#L2) with your discord link. [More information](https://containrrr.dev/shoutrrr/v0.8/services/discord/) is provided on how to create your discord link (token@webhookid).
+2. Restart your watchtower container
+
+```bash
+docker compose down watchtower && docker compose up watchtower -d
+```
+
 
 ## Contribution
 
