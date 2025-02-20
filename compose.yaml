@@ -4,6 +4,8 @@ services:
       context: ./auth
       dockerfile: Dockerfile
     env_file: env/auth.env
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     restart: unless-stopped
 
   cloudflared:
@@ -111,6 +113,7 @@ services:
     command: --cleanup --debug --interval 300
     depends_on:
       - openwebui
+    env_file: env/watchtower.env
     image: containrrr/watchtower
     restart: unless-stopped
     volumes:
