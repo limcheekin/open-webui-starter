@@ -1,5 +1,5 @@
 ANONYMIZED_TELEMETRY=true
-DATABASE_URL="postgresql://postgres:postgres@db:5432/openwebui"
+# DATABASE_URL="postgresql://postgres:postgres@db:5432/openwebui"
 ENABLE_RAG_WEB_SEARCH=true
 ENV=dev
 OLLAMA_BASE_URL=http://ollama:11434
