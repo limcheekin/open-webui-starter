@@ -129,13 +129,27 @@ Update the [env/cloudflared.env](http://github.com/iamobservable/open-webui-star
 
 Update the [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L39) file with your domain name. The link provided will show you the specific line in the file to change.
 
-### Start your docker container environment
+### Start your docker container environment from a terminal
+
+You are ready to start up the containers. Let's do it!
 
 ```sh
 docker compose up -d
 ```
 
-Once the containers are started, access the Open WebUI platform by visiting 
+### Download your first Ollama model from a terminal
+
+You are ready to download an LLM for Ollama. Llama3.2:3b is listed below, but feel free to change this to any model you feel is right. [More on Ollama models](https://ollama.com/search)
+
+```sh
+docker compose exec ollama bash
+
+ollama pull llama3.2:3b
+
+exit
+```
+
+Once the containers are started, and your model downloaded, you are ready to access the Open WebUI platform. Visit 
 `http://<domain-name>/` in your web browser.
 
 
