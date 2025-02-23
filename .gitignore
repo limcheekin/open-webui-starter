@@ -7,6 +7,7 @@ conf/cloudflare/config.yml
 conf/nginx/challenge.conf
 conf/nginx/default.conf
 
+data/nginx
 data/ollama
 data/openwebui
 data/pipelines

@@ -15,6 +15,21 @@ services:
     volumes:
       - ./conf/cloudflare/config:/home/nonroot/.cloudflared
 
+  # comfyui:
+  #   deploy: &gpu-deploy
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   image: yanwk/comfyui-boot:cu124-slim
+  #   ports:
+  #     - 8188:8188
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data/comfyui:/root
+
   db:
     env_file: env/db.env
     image: pgvector/pgvector:pg15
@@ -23,18 +38,18 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
 
   edgetts:
-    deploy: &gpu-deploy
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    deploy: *gpu-deploy
     env_file: env/edgetts.env
     image: travisvn/openai-edge-tts:latest
     ports:
       - 5050:5050
     restart: unless-stopped
+
+  # kokoro:
+  #   deploy: *gpu-deploy
+  #   image: ghcr.io/remsky/kokoro-fastapi-gpu:latest
+  #   ports:
+  #     - 8880:8880
 
   nginx:
     depends_on:
@@ -45,7 +60,8 @@ services:
       - 80:80
     restart: unless-stopped
     volumes:
-      - ./conf/nginx/default.conf:/etc/nginx/nginx.conf
+      - ./conf/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf
 
   ollama:
     deploy: *gpu-deploy
@@ -65,9 +81,9 @@ services:
       - searxng
     deploy: *gpu-deploy
     env_file: env/openwebui.env
+    extra_hosts:
+      - host.docker.internal:host-gateway
     image: ghcr.io/open-webui/open-webui:cuda
-    ports:
-      - 8080:8080
     restart: unless-stopped
     volumes:
       - ./data/openwebui:/app/backend/data
@@ -106,8 +122,12 @@ services:
         max-file: "1"
     restart: unless-stopped
     volumes:
-      - ./data/searxng/settings.yml:/etc/searxng/settings.yml:rw
-      - ./data/searxng/uwsgi.ini:/etc/searxng/uwsgi.ini:rw
+      - ./conf/searxng/settings.yml:/etc/searxng/settings.yml:rw
+      - ./conf/searxng/uwsgi.ini:/etc/searxng/uwsgi.ini:rw
+
+  tika:
+    image: apache/tika:latest-full
+    restart: unless-stopped
 
   watchtower:
     command: --cleanup --debug --interval 300
@@ -118,21 +138,3 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  # OPTIONAL SETUP
-  #
-  # ** local speech synthesis: only us/uk english (currently)
-  # kokoro:
-  #   deploy: *gpu-deploy
-  #   image: ghcr.io/remsky/kokoro-fastapi-gpu:latest
-  #   ports:
-  #     - 8880:8880
-
-  # ** node based image generation
-  # comfyui:
-  #   deploy: *gpu-deploy
-  #   image: yanwk/comfyui-boot:cu124-slim
-  #   ports:
-  #     - 8188:8188
-  #   volumes:
-  #     - ./data/comfyui:/root

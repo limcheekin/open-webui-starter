@@ -27,15 +27,16 @@ Open WebUI. Open WebUI integrates with various Large Language Models (LLMs) and 
 
 This starter project includes the following tooling and applications.
 
+- **[Cloudflare](https://www.cloudflare.com/)**: Platform providing anonymous proxying and SSL certificates
+- **[Edge TTS](https://github.com/rany2/edge-tts)**: Python module that using Microsoft Edge's online text-to-speech service
+- **[Nginx](https://nginx.org/)**: Web server, reverse proxy, load balancer, mail proxy, and HTTP cache
 - **[Ollama](https://ollama.com/)**: Local service API serving open source large language models
 - **[Open WebUI](https://openwebui.com/)**: Open WebUI is an extensible, feature-rich, and user-friendly self-hosted AI platform designed to operate entirely offline
-- **[Edge TTS](https://github.com/rany2/edge-tts)**: Python module that using Microsoft Edge's online text-to-speech service
-- **[Redis](https://redis.io/)**: An open source-available, in-memory storage, used as a distributed, in-memory key–value database, cache and message broker, with optional durability
 - **[Postgresql](https://www.postgresql.org/)/[PgVector](https://github.com/pgvector/pgvector)**: A free and open-source relational database management system (RDBMS) emphasizing extensibility and SQL compliance (has vector addon)
-- **[Sqlite](https://www.sqlite.org/index.html)**: A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine
+- **[Redis](https://redis.io/)**: An open source-available, in-memory storage, used as a distributed, in-memory key–value database, cache and message broker, with optional durability
 - **[Searxng](https://docs.searxng.org/)**: Free internet metasearch engine for open webui tool integration
-- **[Nginx](https://nginx.org/)**: Web server, reverse proxy, load balancer, mail proxy, and HTTP cache
-- **[Cloudflare](https://www.cloudflare.com/)**: Platform providing anonymous proxying and SSL certificates
+- **[Sqlite](https://www.sqlite.org/index.html)**: A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine
+- **[Tika](https://tika.apache.org/)**: A toolkit that detects and extracts metadata and text from over a thousand different file types
 - **[Watchtower](https://github.com/containrrr/watchtower)**: Automated Docker container for updating container images automatically
 
 
@@ -53,10 +54,10 @@ git clone https://github.com/iamobservable/open-webui-starter.git
 
 ```sh
 cp conf/cloudflared/config.example conf/cloudflared/config.yml
-cp conf/nginx/default.example conf/nginx/default.conf
-
-cp data/searxng/settings.yml.example data/searxng/settings.yml
-cp data/searxng/uwsgi.ini.example data/searxng/uwsgi.ini
+cp conf/nginx/nginx.example conf/nginx/nginx.conf
+cp conf/nginx/conf.d/default.example conf/nginx/conf.d/default.conf
+cp cong/searxng/settings.yml.example conf/searxng/settings.yml
+cp conf/searxng/uwsgi.ini.example conf/searxng/uwsgi.ini
 
 cp env/auth.example env/auth.env
 cp env/cloudflared.example env/cloudflared.env
@@ -79,9 +80,13 @@ Make this change to your searxng environment file [env/searxng.env](http://githu
 
 Make this change to your auth environment file [env/auth.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/auth.example#L2). The link provided will lead you to the github repository to read about it.
 
-Make this change to your openwebui environment file [env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L11).
+Make this change to your openwebui environment file [env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L34).
 
 **Make sure the environment files match**:. This allows jwt token authentication to work with the main Open WebUI (/), swagger (/docs), redis (/redis), and searxng (/searxng)
+
+### Add your domain name as WEBUI_URL to your environment files
+
+Make this change to your openwebui environment file [env/openwebui.env](http://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L35).
 
 ### Setup Cloudflare
 
@@ -132,7 +137,7 @@ The easiest route is to skip this section and use Sqlite. If you want to use Pos
 
 __More Detailed__
 
-Uncomment your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L2) file to setup a connection to the locally running db service. To do this, remove the "#" from the beginning of the line.
+Uncomment your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L11) file to setup a connection to the locally running db service. To do this, remove the "#" from the beginning of the line.
 
 ### Start your docker container environment
 
@@ -147,9 +152,30 @@ Once the containers are started, access the Open WebUI platform by visiting
 
 ## Additional Setup
 
-### Migrating from Sqlite to Postgresql
+### Watchtower and Notifications
 
-If your environment is already setup and you do not want to lose data, follow along below. If this is your initial setup, you can skip this and follow the above instructions on how to [Decide on a database](#decide-on-a-database)
+A Watchtower container provides a convenient way to check in on your container 
+versions to see if updates have been released. Once updates are found, Watchtower 
+will pull the latest container image(s), stop the currently running container and 
+start a new container based on the new image. After completing its process, 
+Watchtower can send notifications to you. More can be found on notifications via 
+the [Watchtower website](https://containrrr.dev/watchtower/notifications/).
+
+For the sake of simplicity, this document will cover the instructions for setting 
+up notifications via Discord. If you desire to be more detailed in your configuration, 
+the [arguments section](https://containrrr.dev/watchtower/arguments/) describes 
+additional settings available for the watchtower setup.
+
+1. Edit your [env/watchtower.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/watchtower.example#L2) with your discord link. [More information](https://containrrr.dev/shoutrrr/v0.8/services/discord/) is provided on how to create your discord link (token@webhookid).
+2. Restart your watchtower container
+
+```bash
+docker compose down watchtower && docker compose up watchtower -d
+```
+
+### Legacy migration for Sqlite to Postgresql
+
+For installations where the environment was already setup to use Sqlite. If you want to move to Postgresql, you can follow along below. There is also another solution, created by [Taylor Wilsdon](https://github.com/taylorwilsdon), that can be found on his github repository [open-webui-postgres-migration](https://github.com/taylorwilsdon/open-webui-postgres-migration) that looks pretty nice.
 
 *** Tested using node v22.12.0 ***
 
@@ -181,30 +207,15 @@ specific configuration locations, user, password, and database names.
 node migrate.js ../data/openwebui/webui.db "postgresql://postgres:postgres@localhost/openwebui"
 ```
 
-3. Remove and restart your postgresql container
-```bash
-docker compose down db && docker compose up db -d
+3. Update your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example) file to add the following line. This configuration expects that you are using the default DATABASE_URL.
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost/openwebui"
 ```
 
-### Watchtower and Notifications
-
-A Watchtower container provides a convenient way to check in on your container 
-versions to see if updates have been released. Once updates are found, Watchtower 
-will pull the latest container image(s), stop the currently running container and 
-start a new container based on the new image. After completing its process, 
-Watchtower can send notifications to you. More can be found on notifications via 
-the [Watchtower website](https://containrrr.dev/watchtower/notifications/).
-
-For the sake of simplicity, this document will cover the instructions for setting 
-up notifications via Discord. If you desire to be more detailed in your configuration, 
-the [arguments section](https://containrrr.dev/watchtower/arguments/) describes 
-additional settings available for the watchtower setup.
-
-1. Edit your [env/watchtower.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/watchtower.example#L2) with your discord link. [More information](https://containrrr.dev/shoutrrr/v0.8/services/discord/) is provided on how to create your discord link (token@webhookid).
-2. Restart your watchtower container
-
+4. Remove and restart your postgresql container
 ```bash
-docker compose down watchtower && docker compose up watchtower -d
+docker compose down db && docker compose up db -d
 ```
 
 
