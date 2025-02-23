@@ -117,7 +117,7 @@ This allows Cloudflare to send visitors to your connected environment (home or o
 
 ### Assign your tunnel id
 
-Update the [conf/cloudflared/config.yml](https://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflare/config.example#L1) file with your tunnel id. It can be found located in one of the two red rectangles on the image above.
+Update your [conf/cloudflared/config.yml line #1](https://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflare/config.example#L1) and [conf/cloudflared/config.yml line #2](https://github.com/iamobservable/open-webui-starter/blob/main/conf/cloudflare/config.example#L2) with your tunnel id. It can be found located in one of the two red rectangles on the image above.
 
 ### Assign your tunnel token
 
@@ -127,17 +127,7 @@ Update the [env/cloudflared.env](http://github.com/iamobservable/open-webui-star
 
 ### Add your domain name
 
-Update the [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L34) file with your domain name. The link provided will show you the specific line in the file to change.
-
-### Decide on a database
-
-__TL/DR__
-
-The easiest route is to skip this section and use Sqlite. If you want to use Postgresql as a database, follow along below.
-
-__More Detailed__
-
-Uncomment your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L11) file to setup a connection to the locally running db service. To do this, remove the "#" from the beginning of the line.
+Update the [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L39) file with your domain name. The link provided will show you the specific line in the file to change.
 
 ### Start your docker container environment
 
@@ -207,7 +197,7 @@ specific configuration locations, user, password, and database names.
 node migrate.js ../data/openwebui/webui.db "postgresql://postgres:postgres@localhost/openwebui"
 ```
 
-3. Update your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example) file to add the following line. This configuration expects that you are using the default DATABASE_URL.
+3. Update your [env/openwebui.env](https://github.com/iamobservable/open-webui-starter/blob/main/env/openwebui.example#L11) file to add the following line. This configuration expects that you are using the default DATABASE_URL.
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost/openwebui"
