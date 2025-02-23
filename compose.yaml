@@ -38,7 +38,13 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
 
   edgetts:
-    deploy: *gpu-deploy
+    deploy: &gpu-deploy
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     env_file: env/edgetts.env
     image: travisvn/openai-edge-tts:latest
     ports:
