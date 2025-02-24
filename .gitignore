@@ -1,9 +1,12 @@
+compose.yml
+
 certbot/conf
 certbot/web
 
 data/comfyui
 
 conf/cloudflare/config.yml
+conf/comfyui/runner-scripts/download-models.txt
 conf/nginx/challenge.conf
 conf/nginx/default.conf
 

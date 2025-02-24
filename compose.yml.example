@@ -15,20 +15,22 @@ services:
     volumes:
       - ./conf/cloudflare/config:/home/nonroot/.cloudflared
 
-  # comfyui:
-  #   deploy: &gpu-deploy
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: 1
-  #             capabilities: [gpu]
-  #   image: yanwk/comfyui-boot:cu124-slim
-  #   ports:
-  #     - 8188:8188
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./data/comfyui:/root
+  comfyui:
+    deploy: &gpu-deploy
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    env_file: env/comfyui.env
+    image: yanwk/comfyui-boot:cu124-slim
+    ports:
+      - 8188:8188
+    restart: unless-stopped
+    volumes:
+      - ./data/ComfyUI:/root/ComfyUI
+      - ./conf/comfyui/runner-scripts/download-models.txt:/runner-scripts/download-models.txt
 
   db:
     env_file: env/db.env
