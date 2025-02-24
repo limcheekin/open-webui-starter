@@ -183,7 +183,8 @@ The starter follows the [Open WebUI docs](https://docs.openwebui.com/tutorials/i
 - [ae.safetensors](https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors) (327.4MB)
 - [clip_l.safetensors](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors) (240.3MB)
 - [t5xxl_fp8_e4m3fn.safetensors](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors) (4.8GB)
-- [flux1-schnell.safetensors](https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors) (23.2GB)
+- [flux1-schnell-fp8.safetensors](https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-schnell-fp8.safetensors) (17.2GB)
+- [flux1-dev-fp8.safetensors](https://huggingface.co/Comfy-Org/flux1-schnell/resolve/main/flux1-dev-fp8.safetensors) (17.2GB)
 
 ***The models will take a considerable amount of time to download, depending on your internet connection, and will not be immediately ready to use when you first start your containers.***
 
