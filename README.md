@@ -28,6 +28,7 @@ Open WebUI. Open WebUI integrates with various Large Language Models (LLMs) and 
 This starter project includes the following tooling and applications.
 
 - **[Cloudflare](https://www.cloudflare.com/)**: Platform providing anonymous proxying and SSL certificates
+- **[ComfyUI](https://www.comfy.org/)**: Platform for generating node based images
 - **[Edge TTS](https://github.com/rany2/edge-tts)**: Python module that using Microsoft Edge's online text-to-speech service
 - **[Nginx](https://nginx.org/)**: Web server, reverse proxy, load balancer, mail proxy, and HTTP cache
 - **[Ollama](https://ollama.com/)**: Local service API serving open source large language models
@@ -64,6 +65,7 @@ cp conf/searxng/uwsgi.ini.example conf/searxng/uwsgi.ini
 
 cp env/auth.example env/auth.env
 cp env/cloudflared.example env/cloudflared.env
+cp env/comfyui.example env/comfyui.env
 cp env/db.example env/db.env
 cp env/edgetts.example env/edgetts.env
 cp env/ollama.example env/ollama.env
