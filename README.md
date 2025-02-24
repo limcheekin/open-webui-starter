@@ -50,10 +50,13 @@ To install the Open WebUI Starter project, follow these steps:
 git clone https://github.com/iamobservable/open-webui-starter.git
 ```
 
-### Create the environment files
+### Create the docker compose and environment files
 
 ```sh
+cp compose.yml.example compose.yml
+
 cp conf/cloudflared/config.example conf/cloudflared/config.yml
+cp conf/comfyui/runner-scripts/download-models.txt.example conf/comfyui/runner-scripts/download-models.txt
 cp conf/nginx/nginx.example conf/nginx/nginx.conf
 cp conf/nginx/conf.d/default.example conf/nginx/conf.d/default.conf
 cp cong/searxng/settings.yml.example conf/searxng/settings.yml
@@ -145,8 +148,6 @@ You are ready to download an LLM for Ollama. Llama3.2:3b is listed below, but fe
 docker compose exec ollama bash
 
 ollama pull llama3.2:3b
-
-exit
 ```
 
 Once the containers are started, and your model downloaded, you are ready to access the Open WebUI platform. Visit 
@@ -155,6 +156,39 @@ Once the containers are started, and your model downloaded, you are ready to acc
 
 
 ## Additional Setup
+
+### Adding models to ComfyUI
+
+The starter makes use of the docker image [yanwk/comfyui-boot:cu124-slim](https://github.com/YanWenKun/ComfyUI-Docker/tree/main/cu124-slim) for building the ComfyUI container.  This image has a special file [download-models.txt](https://github.com/iamobservable/open-webui-starter/blob/main/conf/comfyui/runner-scripts/model-downloads.txt.example). The file is responsible for configuring model downloads during the initial startup. It has a structure that allows you to provide a download image, directory path (dir), and a file name (out) in a list based row format. The models are listed with their name, link and file size.
+
+**Format definition**
+
+```
+<model-download-url>
+  dir=<directory-path>
+  out=<output-file-name>
+```
+
+The base docker image includes the following models:
+
+- [taesd_decoder](https://raw.githubusercontent.com/madebyollin/taesd/main/taesd_decoder.pth) (4.8MB)
+- [taesdxl_decoder](https://raw.githubusercontent.com/madebyollin/taesd/main/taesdxl_decoder.pth) (4.8MB)
+- [taesd3_decoder](https://raw.githubusercontent.com/madebyollin/taesd/main/taesd3_decoder.pth) (4.8MB)
+- [taef1_decoder](https://raw.githubusercontent.com/madebyollin/taesd/main/taef1_decoder.pth) (4.8MB)
+
+The starter follows the [Open WebUI docs](https://docs.openwebui.com/tutorials/images/#setting-up-flux1-models) on model setup and adds the models provided.
+
+*As a reminder, you will not need to download any of the models listed above on your own. By starting the containers, the ComfyUI container will download these models automatically!*
+
+- [ae.safetensors](https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/ae.safetensors) (327.4MB)
+- [clip_l.safetensors](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors) (240.3MB)
+- [t5xxl_fp8_e4m3fn.safetensors](https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp8_e4m3fn.safetensors) (4.8GB)
+- [flux1-schnell.safetensors](https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/flux1-schnell.safetensors) (23.2GB)
+
+***The models will take a considerable amount of time to download, depending on your internet connection, and will not be immediately ready to use when you first start your containers.***
+
+If you want to add additional models to your container, update the [conf/comfyui/runner-scripts/download-models.txt](https://github.com/iamobservable/open-webui-starter/blob/main/conf/comfyui/runner-scripts/model-downloads.txt.example) file located in your project directory.
+
 
 ### Watchtower and Notifications
 
