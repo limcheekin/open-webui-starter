@@ -12,6 +12,7 @@ services:
     env_file: env/cloudflared.env
     command: tunnel --no-autoupdate run
     image: cloudflare/cloudflared:latest
+    restart: unless-stopped
     volumes:
       - ./conf/cloudflare/config:/home/nonroot/.cloudflared
 
@@ -62,6 +63,7 @@ services:
   nginx:
     depends_on:
       - auth
+      - cloudflared
       - openwebui
     image: nginx:latest
     ports:
