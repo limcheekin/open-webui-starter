@@ -132,7 +132,7 @@ Update the [env/cloudflared.env](http://github.com/iamobservable/open-webui-star
 
 ### Add your domain name
 
-Update the [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L39) file with your domain name. The link provided will show you the specific line in the file to change.
+Update the [conf/nginx/default.conf](https://github.com/iamobservable/open-webui-starter/blob/main/conf/nginx/default.example#L34) file with your domain name. The link provided will show you the specific line in the file to change.
 
 ### Start your docker container environment from a terminal
 
