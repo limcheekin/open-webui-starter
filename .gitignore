@@ -7,8 +7,11 @@ data/comfyui
 
 conf/cloudflare/config.yml
 conf/comfyui/runner-scripts/download-models.txt
-conf/nginx/challenge.conf
-conf/nginx/default.conf
+conf/nginx/nginx.conf
+conf/nginx/conf.d/default.conf
+conf/searxng/settings.yml
+conf/searxng/uwsgi.ini
+
 
 data/nginx
 data/ollama
@@ -16,8 +19,5 @@ data/openwebui
 data/pipelines
 data/postgres
 data/redis
-
-data/searxng/settings.yml
-data/searxng/uwsgi.ini
 
 env/*.env
