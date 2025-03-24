@@ -40,6 +40,44 @@ This starter project includes the following tooling and applications.
 - **[Tika](https://tika.apache.org/)**: A toolkit that detects and extracts metadata and text from over a thousand different file types
 - **[Watchtower](https://github.com/containrrr/watchtower)**: Automated Docker container for updating container images automatically
 
+```mermaid
+graph TD
+    subgraph Independent Services
+        auth[auth]
+        cloudflared[cloudflared]
+        comfyui[comfyui]
+        db[db]
+        edgetts[edgetts]
+        ollama[ollama]
+        pipelines[pipelines]
+        redis[redis]
+        tika[tika]
+    end
+
+    subgraph Dependent Services
+        nginx[nginx]
+        openwebui[openwebui]
+        searxng[searxng]
+        watchtower[watchtower]
+    end
+
+    %% nginx dependencies
+    nginx --> auth
+    nginx --> cloudflared
+    nginx --> openwebui
+
+    %% openwebui dependencies
+    openwebui --> db
+    openwebui --> edgetts
+    openwebui --> ollama
+    openwebui --> searxng
+
+    %% searxng dependency
+    searxng --> redis
+
+    %% watchtower dependency
+    watchtower --> openwebui
+```
 
 ## Installation
 
