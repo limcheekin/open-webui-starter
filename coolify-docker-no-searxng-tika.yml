@@ -1,0 +1,75 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      - 'POSTGRES_DB=${POSTGRES_DB:-openwebui}'
+      - 'POSTGRES_USER=${POSTGRES_USER:-postgres}'
+      - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}'
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  edgetts:
+    image: travisvn/openai-edge-tts:latest
+    environment:
+      - 'DEFAULT_VOICE=${DEFAULT_VOICE:-en-US-EmmaMultilingualNeural}'
+      - 'DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT:-mp3}'
+      - 'DEFAULT_SPEED=${DEFAULT_SPEED:-1.0}'
+    ports:
+      - 5050:5050
+    restart: unless-stopped
+
+  openwebui:
+    depends_on:
+      - db
+      - edgetts
+    environment:
+      - 'ANONYMIZED_TELEMETRY=${ANONYMIZED_TELEMETRY:-true}'
+      - 'AUDIO_TTS_API_KEY=${AUDIO_TTS_API_KEY:-your_api_key_here}'
+      - 'AUDIO_TTS_ENGINE=${AUDIO_TTS_ENGINE:-openai}'
+      - 'AUDIO_TTS_MODEL=${AUDIO_TTS_MODEL:-tts-1-hd}'
+      - 'AUDIO_TTS_OPENAI_API_BASE_URL=${AUDIO_TTS_OPENAI_API_BASE_URL:-http://edgetts:5050/v1}'
+      - 'AUDIO_TTS_OPENAI_API_KEY=${AUDIO_TTS_OPENAI_API_KEY:-your_api_key_here}'
+      - 'AUDIO_TTS_VOICE=${AUDIO_TTS_VOICE:-en-US-EmmaMultilingualNeural}'
+      # - 'COMFYUI_API_KEY=${COMFYUI_API_KEY:-}'
+      # - 'COMFYUI_BASE_URL=${COMFYUI_BASE_URL:-http://comfyui:8188}'
+      - 'CONTENT_EXTRACTION_ENGINE=${CONTENT_EXTRACTION_ENGINE:-tika}'
+      - 'DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
+      - 'ENABLE_EVALUATION_ARENA_MODELS=${ENABLE_EVALUATION_ARENA_MODELS:-false}'
+      # - 'ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-true}'
+      - 'ENABLE_OLLAMA_API=${ENABLE_OLLAMA_API:-false}'
+      - 'ENABLE_RAG_WEB_SEARCH=${ENABLE_RAG_WEB_SEARCH:-true}'
+      - 'ENV=${ENV:-dev}'
+      # - 'IMAGE_GENERATION_ENGINE=${IMAGE_GENERATION_ENGINE:-comfyui}'
+      # - 'IMAGE_GENERATION_MODEL=${IMAGE_GENERATION_MODEL:-FLUX.1-schnell}'
+      # - 'IMAGE_SIZE=${IMAGE_SIZE:-512x512}'
+      - 'OLLAMA_BASE_URLS=${OLLAMA_BASE_URLS:-http://ollama:11434}'
+      - 'PDF_EXTRACT_IMAGES=${PDF_EXTRACT_IMAGES:-true}'
+      - 'PGVECTOR_DB_URL=${PGVECTOR_DB_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
+      - 'RAG_EMBEDDING_ENGINE=${RAG_EMBEDDING_ENGINE:-ollama}'
+      - 'RAG_EMBEDDING_MODEL=${RAG_EMBEDDING_MODEL:-nomic-embed-text:latest}'
+      - 'RAG_OLLAMA_BASE_URL=${RAG_OLLAMA_BASE_URL:-http://ollama:11434}'
+      - 'RAG_TEXT_SPLITTER=${RAG_TEXT_SPLITTER:-token}'
+      - 'RAG_WEB_SEARCH_ENGINE=${RAG_WEB_SEARCH_ENGINE:-searxng}'
+      - 'RAG_WEB_SEARCH_RESULT_COUNT=${RAG_WEB_SEARCH_RESULT_COUNT:-3}'
+      - 'RAG_WEB_SEARCH_CONCURRENT_REQUESTS=${RAG_WEB_SEARCH_CONCURRENT_REQUESTS:-10}'
+      - 'SEARXNG_QUERY_URL=${SEARXNG_QUERY_URL:-http://searxng:8080/search?q=<query>}'
+      - 'TIKA_SERVER_URL=${TIKA_SERVER_URL:-http://tika:9998}'
+      - 'USE_CUDA_DOCKER=${USE_CUDA_DOCKER:-false}'
+      - 'VECTOR_DB=${VECTOR_DB:-pgvector}'
+      - 'WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-CHANGE_BEFORE_GOING_LIVE}'
+      - 'WEBUI_URL=${WEBUI_URL:-http://localhost:3000}'
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: ghcr.io/open-webui/open-webui:main
+    restart: unless-stopped
+    volumes:
+      - openwebui-data:/app/backend/data
+
+  pipelines:
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: ghcr.io/open-webui/pipelines:main
+    restart: unless-stopped
+    volumes:
+      - pipelines-data:/app/pipelines
