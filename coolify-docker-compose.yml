@@ -1,14 +1,4 @@
 services:
-  db:
-    image: pgvector/pgvector:pg17
-    environment:
-      - 'POSTGRES_DB=${POSTGRES_DB:-openwebui}'
-      - 'POSTGRES_USER=${POSTGRES_USER:-postgres}'
-      - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}'
-    restart: unless-stopped
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
   edgetts:
     image: travisvn/openai-edge-tts:latest
     environment:
@@ -21,7 +11,6 @@ services:
 
   openwebui:
     depends_on:
-      - db
       - edgetts
       - searxng
     environment:
@@ -47,9 +36,10 @@ services:
       - 'OLLAMA_BASE_URLS=${OLLAMA_BASE_URLS:-http://ollama:11434}'
       - 'PDF_EXTRACT_IMAGES=${PDF_EXTRACT_IMAGES:-true}'
       - 'PGVECTOR_DB_URL=${PGVECTOR_DB_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
-      - 'RAG_EMBEDDING_ENGINE=${RAG_EMBEDDING_ENGINE:-ollama}'
+      - 'RAG_EMBEDDING_ENGINE=${RAG_EMBEDDING_ENGINE:-openai}'
       - 'RAG_EMBEDDING_MODEL=${RAG_EMBEDDING_MODEL:-nomic-embed-text:latest}'
       - 'RAG_OLLAMA_BASE_URL=${RAG_OLLAMA_BASE_URL:-http://ollama:11434}'
+      - 'RAG_OPENAI_API_BASE_URL=${RAG_OPENAI_API_BASE_URL:-http://10.0.0.2:8880/v1}'
       - 'RAG_TEXT_SPLITTER=${RAG_TEXT_SPLITTER:-token}'
       - 'RAG_WEB_SEARCH_ENGINE=${RAG_WEB_SEARCH_ENGINE:-searxng}'
       - 'RAG_WEB_SEARCH_RESULT_COUNT=${RAG_WEB_SEARCH_RESULT_COUNT:-3}'
