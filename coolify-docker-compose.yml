@@ -6,8 +6,6 @@ services:
       - 'DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT:-mp3}'
       - 'DEFAULT_SPEED=${DEFAULT_SPEED:-1.0}'
       - 'API_KEY=${AUDIO_TTS_API_KEY:-your_api_key_here}'
-    ports:
-      - 5050:5050
     restart: unless-stopped
 
   openwebui:
