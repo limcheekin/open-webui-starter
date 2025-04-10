@@ -12,7 +12,6 @@ services:
   openwebui:
     depends_on:
       - edgetts
-      - searxng
     environment:
       - 'ANONYMIZED_TELEMETRY=${ANONYMIZED_TELEMETRY:-true}'
       - 'AUDIO_TTS_API_KEY=${AUDIO_TTS_API_KEY:-your_api_key_here}'
@@ -64,38 +63,6 @@ services:
     restart: unless-stopped
     volumes:
       - pipelines-data:/app/pipelines
-
-  redis:
-    environment:
-      - 'RI_PROXY_PATH=${RI_PROXY_PATH:-redis}'
-    image: redis/redis-stack:latest
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-
-  searxng:
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-    cap_drop:
-      - ALL
-    depends_on:
-      - redis
-    environment:
-      - 'SEARXNG_REDIS_URL=${SEARXNG_REDIS_URL:-redis://redis:6379/1}'
-      - 'SEARXNG_SECRET=${SEARXNG_SECRET:-YOUR-SECRET-KEY}'
-    image: searxng/searxng:latest
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1m"
-        max-file: "1"
-    restart: unless-stopped
-    volumes:
-      - /home/limcheekin/docker/volumes/searxng/conf/settings.yml:/etc/searxng/settings.yml:rw
-      - /home/limcheekin/docker/volumes/searxng/conf/uwsgi.ini:/etc/searxng/uwsgi.ini:rw
 
   tika:
     image: apache/tika:latest-full
