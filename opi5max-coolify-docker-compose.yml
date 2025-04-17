@@ -1,0 +1,115 @@
+services:
+  edgetts:
+    build:
+      context: https://github.com/travisvn/openai-edge-tts.git
+    ports:
+      - '8885:5050'
+    environment:
+      - 'DEFAULT_VOICE=${DEFAULT_VOICE:-en-US-EmmaMultilingualNeural}'
+      - 'DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT:-mp3}'
+      - 'DEFAULT_SPEED=${DEFAULT_SPEED:-1.0}'
+      - 'API_KEY=${AUDIO_TTS_API_KEY:-your_api_key_here}'
+    restart: unless-stopped
+
+  openwebui:
+    depends_on:
+      - edgetts
+      - searxng
+    ports:
+      - '8888:8080'      
+    environment:
+      - 'ANONYMIZED_TELEMETRY=${ANONYMIZED_TELEMETRY:-true}'
+      - 'AUDIO_TTS_API_KEY=${AUDIO_TTS_API_KEY:-your_api_key_here}'
+      - 'AUDIO_TTS_ENGINE=${AUDIO_TTS_ENGINE:-openai}'
+      - 'AUDIO_TTS_MODEL=${AUDIO_TTS_MODEL:-tts-1-hd}'
+      - 'AUDIO_TTS_OPENAI_API_BASE_URL=${AUDIO_TTS_OPENAI_API_BASE_URL:-http://edgetts:5050/v1}'
+      - 'AUDIO_TTS_OPENAI_API_KEY=${AUDIO_TTS_OPENAI_API_KEY:-your_api_key_here}'
+      - 'AUDIO_TTS_VOICE=${AUDIO_TTS_VOICE:-en-US-EmmaMultilingualNeural}'
+      # - 'COMFYUI_API_KEY=${COMFYUI_API_KEY:-}'
+      # - 'COMFYUI_BASE_URL=${COMFYUI_BASE_URL:-http://comfyui:8188}'
+      - 'CONTENT_EXTRACTION_ENGINE=${CONTENT_EXTRACTION_ENGINE:-tika}'
+      - 'DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
+      - 'ENABLE_EVALUATION_ARENA_MODELS=${ENABLE_EVALUATION_ARENA_MODELS:-false}'
+      # - 'ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-true}'
+      - 'ENABLE_OLLAMA_API=${ENABLE_OLLAMA_API:-false}'
+      - 'ENABLE_RAG_WEB_SEARCH=${ENABLE_RAG_WEB_SEARCH:-true}'
+      - 'ENV=${ENV:-dev}'
+      # - 'IMAGE_GENERATION_ENGINE=${IMAGE_GENERATION_ENGINE:-comfyui}'
+      # - 'IMAGE_GENERATION_MODEL=${IMAGE_GENERATION_MODEL:-FLUX.1-schnell}'
+      # - 'IMAGE_SIZE=${IMAGE_SIZE:-512x512}'
+      - 'OLLAMA_BASE_URLS=${OLLAMA_BASE_URLS:-http://ollama:11434}'
+      - 'PDF_EXTRACT_IMAGES=${PDF_EXTRACT_IMAGES:-true}'
+      - 'PGVECTOR_DB_URL=${PGVECTOR_DB_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
+      - 'RAG_EMBEDDING_ENGINE=${RAG_EMBEDDING_ENGINE:-openai}'
+      - 'RAG_EMBEDDING_MODEL=${RAG_EMBEDDING_MODEL:-nomic-embed-text:latest}'
+      - 'RAG_OLLAMA_BASE_URL=${RAG_OLLAMA_BASE_URL:-http://ollama:11434}'
+      - 'RAG_OPENAI_API_BASE_URL=${RAG_OPENAI_API_BASE_URL:-http://10.0.0.2:8880/v1}'
+      - 'RAG_TEXT_SPLITTER=${RAG_TEXT_SPLITTER:-token}'
+      - 'RAG_WEB_SEARCH_ENGINE=${RAG_WEB_SEARCH_ENGINE:-searxng}'
+      - 'RAG_WEB_SEARCH_RESULT_COUNT=${RAG_WEB_SEARCH_RESULT_COUNT:-3}'
+      - 'RAG_WEB_SEARCH_CONCURRENT_REQUESTS=${RAG_WEB_SEARCH_CONCURRENT_REQUESTS:-10}'
+      - 'SEARXNG_QUERY_URL=${SEARXNG_QUERY_URL:-http://searxng:8080/search?q=<query>}'
+      - 'TIKA_SERVER_URL=${TIKA_SERVER_URL:-http://tika:9998}'
+      - 'USE_CUDA_DOCKER=${USE_CUDA_DOCKER:-false}'
+      - 'VECTOR_DB=${VECTOR_DB:-pgvector}'
+      - 'WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-CHANGE_BEFORE_GOING_LIVE}'
+      - 'WEBUI_URL=${WEBUI_URL:-http://localhost:8888}'
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: ghcr.io/open-webui/open-webui:main
+    restart: unless-stopped
+    volumes:
+      - openwebui-data:/app/backend/data
+
+  pipelines:
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: ghcr.io/open-webui/pipelines:main
+    restart: unless-stopped
+    volumes:
+      - pipelines-data:/app/pipelines
+
+  redis:
+    environment:
+      - 'RI_PROXY_PATH=${RI_PROXY_PATH:-redis}'
+    image: redis/redis-stack:latest
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  searxng:
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    cap_drop:
+      - ALL
+    depends_on:
+      - redis
+    environment:
+      - 'SEARXNG_REDIS_URL=${SEARXNG_REDIS_URL:-redis://redis:6379/1}'
+      - 'SEARXNG_SECRET=${SEARXNG_SECRET:-YOUR-SECRET-KEY}'
+    image: searxng/searxng:latest
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+    restart: unless-stopped
+    volumes:
+      - /home/limcheekin/docker/volumes/searxng/conf/settings.yml:/etc/searxng/settings.yml:rw
+      - /home/limcheekin/docker/volumes/searxng/conf/uwsgi.ini:/etc/searxng/uwsgi.ini:rw
+      - /home/limcheekin/docker/volumes/searxng/conf/limiter.toml:/etc/searxng/limiter.toml:rw
+  tika:
+    image: apache/tika:latest-full
+    restart: unless-stopped
+
+  watchtower:
+    command: --cleanup --debug --interval 300
+    depends_on:
+      - openwebui
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
