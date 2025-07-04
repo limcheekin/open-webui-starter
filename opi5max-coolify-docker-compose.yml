@@ -3,14 +3,13 @@ services:
     build:
       context: https://github.com/travisvn/openai-edge-tts.git
     ports:
-      - '8885:5050'
+      - '8885:5050'    
     environment:
       - 'DEFAULT_VOICE=${DEFAULT_VOICE:-en-US-EmmaMultilingualNeural}'
       - 'DEFAULT_RESPONSE_FORMAT=${DEFAULT_RESPONSE_FORMAT:-mp3}'
       - 'DEFAULT_SPEED=${DEFAULT_SPEED:-1.0}'
       - 'API_KEY=${AUDIO_TTS_API_KEY:-your_api_key_here}'
     restart: unless-stopped
-
   openwebui:
     depends_on:
       - edgetts
@@ -25,18 +24,12 @@ services:
       - 'AUDIO_TTS_OPENAI_API_BASE_URL=${AUDIO_TTS_OPENAI_API_BASE_URL:-http://edgetts:5050/v1}'
       - 'AUDIO_TTS_OPENAI_API_KEY=${AUDIO_TTS_OPENAI_API_KEY:-your_api_key_here}'
       - 'AUDIO_TTS_VOICE=${AUDIO_TTS_VOICE:-en-US-EmmaMultilingualNeural}'
-      # - 'COMFYUI_API_KEY=${COMFYUI_API_KEY:-}'
-      # - 'COMFYUI_BASE_URL=${COMFYUI_BASE_URL:-http://comfyui:8188}'
       - 'CONTENT_EXTRACTION_ENGINE=${CONTENT_EXTRACTION_ENGINE:-tika}'
       - 'DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
       - 'ENABLE_EVALUATION_ARENA_MODELS=${ENABLE_EVALUATION_ARENA_MODELS:-false}'
-      # - 'ENABLE_IMAGE_GENERATION=${ENABLE_IMAGE_GENERATION:-true}'
       - 'ENABLE_OLLAMA_API=${ENABLE_OLLAMA_API:-false}'
       - 'ENABLE_RAG_WEB_SEARCH=${ENABLE_RAG_WEB_SEARCH:-true}'
       - 'ENV=${ENV:-dev}'
-      # - 'IMAGE_GENERATION_ENGINE=${IMAGE_GENERATION_ENGINE:-comfyui}'
-      # - 'IMAGE_GENERATION_MODEL=${IMAGE_GENERATION_MODEL:-FLUX.1-schnell}'
-      # - 'IMAGE_SIZE=${IMAGE_SIZE:-512x512}'
       - 'OLLAMA_BASE_URLS=${OLLAMA_BASE_URLS:-http://ollama:11434}'
       - 'PDF_EXTRACT_IMAGES=${PDF_EXTRACT_IMAGES:-true}'
       - 'PGVECTOR_DB_URL=${PGVECTOR_DB_URL:-postgresql://postgres:postgres@db:5432/openwebui}'
@@ -53,30 +46,29 @@ services:
       - 'USE_CUDA_DOCKER=${USE_CUDA_DOCKER:-false}'
       - 'VECTOR_DB=${VECTOR_DB:-pgvector}'
       - 'WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-CHANGE_BEFORE_GOING_LIVE}'
-      - 'WEBUI_URL=${WEBUI_URL:-http://localhost:8888}'
+      - 'WEBUI_URL=${WEBUI_URL:-http://192.168.1.111:8888}'
+      - TEXT_SPLITTER=markdown_header
+      - TEXT_SPLITTER_OPTIONS={"markdown_header":{"headers_to_split_on":[["##","Header 2"]],"strip_headers":false}}
     extra_hosts:
-      - host.docker.internal:host-gateway
-    image: ghcr.io/open-webui/open-webui:main
+      - 'host.docker.internal:host-gateway'
+    image: 'ghcr.io/open-webui/open-webui:main'
     restart: unless-stopped
     volumes:
-      - openwebui-data:/app/backend/data
-
+      - 'openwebui-data:/app/backend/data'
   pipelines:
     extra_hosts:
-      - host.docker.internal:host-gateway
-    image: ghcr.io/open-webui/pipelines:main
+      - 'host.docker.internal:host-gateway'
+    image: 'ghcr.io/open-webui/pipelines:main'
     restart: unless-stopped
     volumes:
-      - pipelines-data:/app/pipelines
-
+      - 'pipelines-data:/app/pipelines'
   redis:
     environment:
       - 'RI_PROXY_PATH=${RI_PROXY_PATH:-redis}'
-    image: redis/redis-stack:latest
+    image: 'redis/redis-stack:latest'
     restart: unless-stopped
     volumes:
-      - redis-data:/data
-
+      - 'redis-data:/data'
   searxng:
     cap_add:
       - CHOWN
@@ -90,26 +82,44 @@ services:
     environment:
       - 'SEARXNG_REDIS_URL=${SEARXNG_REDIS_URL:-redis://redis:6379/1}'
       - 'SEARXNG_SECRET=${SEARXNG_SECRET:-YOUR-SECRET-KEY}'
-    image: searxng/searxng:latest
+    image: 'searxng/searxng:latest'
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "1m"
-        max-file: "1"
+        max-size: 1m
+        max-file: '1'
     restart: unless-stopped
     volumes:
-      - /home/limcheekin/docker/volumes/searxng/conf/settings.yml:/etc/searxng/settings.yml:rw
-      - /home/limcheekin/docker/volumes/searxng/conf/uwsgi.ini:/etc/searxng/uwsgi.ini:rw
-      - /home/limcheekin/docker/volumes/searxng/conf/limiter.toml:/etc/searxng/limiter.toml:rw
+      - '/home/limcheekin/docker/volumes/searxng/conf/settings.yml:/etc/searxng/settings.yml:rw'
+      - '/home/limcheekin/docker/volumes/searxng/conf/uwsgi.ini:/etc/searxng/uwsgi.ini:rw'
+      - '/home/limcheekin/docker/volumes/searxng/conf/limiter.toml:/etc/searxng/limiter.toml:rw'
   tika:
-    image: apache/tika:latest-full
+    image: 'apache/tika:latest-full'
     restart: unless-stopped
-
-  watchtower:
-    command: --cleanup --debug --interval 300
-    depends_on:
-      - openwebui
-    image: containrrr/watchtower
+#  watchtower:
+#    command: '--cleanup --debug --interval 86400'
+#    depends_on:
+#      - openwebui
+#    image: containrrr/watchtower
+#    restart: unless-stopped
+#    volumes:
+#      - '/var/run/docker.sock:/var/run/docker.sock'
+  mcposerver:
+    command: ["--config", "/app/conf/config.json"]
+    image: ghcr.io/open-webui/mcpo:latest
     restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/limcheekin/docker/volumes/mcposerver/conf:/app/conf:ro
+  docling:
+    ports:
+      - '8889:5001'
+    environment:
+      - 'DOCLING_SERVE_ENABLE_UI=${DOCLING_SERVE_ENABLE_UI:-true}'    
+    healthcheck:
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      test: curl --fail http://localhost:5001/health || exit 1
+      timeout: 5s
+    image: quay.io/docling-project/docling-serve:latest
+    restart: unless-stopped
